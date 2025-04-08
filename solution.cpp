@@ -1,9 +1,6 @@
 #include "solution.h"
 #include <iostream>
 
-
-
-
 void Solution::print(){
     std::cout << "Route: ";
     for(int i = 0; i < Data::getInstance().n; i++){
@@ -17,9 +14,6 @@ void Solution::copy(const Solution &other){
     route = std::vector<int>(other.route);
     cost = other.cost;
 }
-
-
-
 
 void Solution::buildTrivial(){
     Data & data = Data::getInstance();
@@ -35,7 +29,6 @@ void Solution::buildTrivial(){
     }
     cost += data.matrizAdj[route[data.n-1]][route[0]];
 }
-
 
 double Solution::evaluateSwap(const int i, const int j){
     Data & data = Data::getInstance();
