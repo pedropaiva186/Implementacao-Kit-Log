@@ -4,7 +4,7 @@ lisrun:
 	g++ *.cpp -o tsp -O3
 
 run:
-	start ./tsp
+	./tsp
 
 clean:
 	rm ./tsp
