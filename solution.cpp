@@ -10,6 +10,20 @@ void Solution::print(){
     std::cout << "Cost: " << cost << std::endl;
 }
 
+void Solution::calculateCost() {
+    Data& data = Data::getInstance();
+    double** matriz = data.matrizAdj;
+    cost = 0;
+    int vert1, vert2;
+
+    for(int i = 0; i < data.n; i++) {
+        vert1 = route[i];
+        vert2 = route[i + 1];
+
+        cost += matriz[vert1][vert2];
+    }
+}
+
 void Solution::copy(const Solution &other){
     route = std::vector<int>(other.route);
     cost = other.cost;

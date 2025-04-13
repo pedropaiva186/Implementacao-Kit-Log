@@ -16,6 +16,8 @@ struct Solution
 
     void buildTrivial();
 
+    void calculateCost();
+
     void print();
 
     void copy(const Solution &other);

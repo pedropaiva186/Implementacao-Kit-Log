@@ -95,6 +95,7 @@ Solution Construcao() {
     Solution s;
     // Criando o vector inicial, que será preenchido com os vértices do CL
     s.route = std::vector<int>(2, 1);
+    s.cost = 0;
     std::vector<int> CL = preencheCL();
 
     while(CL.size() != 0) {
@@ -104,7 +105,7 @@ Solution Construcao() {
         double alpha = 0.5;
         /*
         * Aqui nós definimos um índice aleatório dentre os possíveis, fazendo isso da seguinte maneira: nós
-        * primeiro vamos pegar a quantidade de escolhas possíveis, colocando a porcentagem "aplha" vezes
+        * primeiro vamos pegar a quantidade de escolhas possíveis, colocando a porcentagem "alpha" vezes
         * o tamanho do array de possibilidades, e então vamos usar o "(int) ceil()", para que pegamos o teto
         * do número dado no formato de inteiro, então vamos usar o "rand()", para escolher um número
         * aleatório, e com o "%", usamos módulo para poder definir um teto para esse número aleatório,
