@@ -12,7 +12,7 @@ void Solution::print(){
 
 void Solution::calculateCost() {
     Data& data = Data::getInstance();
-    double** matriz = data.matrizAdj;
+    auto & matriz = data.matrizAdj;
     cost = 0;
     int vert1, vert2;
 
@@ -44,39 +44,43 @@ void Solution::buildTrivial(){
     cost += data.matrizAdj[route[data.n-1]][route[0]];
 }
 
-double Solution::evaluateSwap(const int i, const int j){
-    Data & data = Data::getInstance();
-    
-    double  a_subtrair, a_somar, delta;
-
-    if ((j == i + 1)){
-        
-        a_subtrair = data.matrizAdj[route[i-1]][route[i]] + data.matrizAdj[route[j]][route[j+ 1]]; // arcos que serão "cortados" da solução
-        a_somar = data.matrizAdj[route[i -1]][route[j]] + data.matrizAdj[route[i]][route[j + 1]]; // arcos que serão "adicionados" na solução
-        
-    }
-    else{
-         a_subtrair = data.matrizAdj[route[i - 1]][route[i]] + data.matrizAdj[route[i]] [route[i + 1]] 
-                    + data.matrizAdj[route[j-1]][route[j]] + data.matrizAdj[route[j]][route[j+1]];
-
-        a_somar = data.matrizAdj[route[i - 1]][route[j]] + data.matrizAdj[route[j]] [route[i + 1]] 
-                    + data.matrizAdj[route[j - 1]][route[i]] + data.matrizAdj[route[i]][route[j+1]];
-        
-    }
-
-    delta = a_somar - a_subtrair; // calcula a diferença de custo da solução após sofrer um movimento
-    
-    //
-    
-    return delta;
-}
-
 void Solution::swap(const int i, const int j){
     Data & data = Data::getInstance();
-    cost += evaluateSwap(i, j); // somar a diferença de custo da solução após sofrer um movimento 
-                                //implica em atualizar o custo da solução
+    
     int aux = route[i];
     route[i] = route[j];
     route[j] = aux;
     
+}
+
+// Função que executará o 2-OPT
+void Solution::mov2OPT(Solution & s, int init, int fim) {
+    Data & data = Data::getInstance();
+
+    while(init < fim) {
+        int aux = s.route[init];
+
+        s.route[init] = s.route[fim];
+        s.route[fim] = aux;
+
+        init++;
+        fim--;
+    }
+}
+
+// Função que executará o Insertion
+void Solution::insertion(Solution & s, int posVert, int posInserir, int bloco) {
+    Data & data = Data::getInstance();
+    auto & rota = s.route;
+    std::vector<int> vert;
+
+    vert.insert(vert.begin(), rota.begin() + posVert, rota.begin() + posVert + bloco);
+
+    if(posVert < posInserir) {
+        rota.insert(rota.begin() + posInserir + 1, vert.begin(), vert.end());
+        rota.erase(rota.begin() + posVert, rota.begin() + posVert + bloco);
+    } else {
+        rota.erase(rota.begin() + posVert, rota.begin() + posVert + bloco);
+        rota.insert(rota.begin() + posInserir + 1, vert.begin(), vert.end());
+    }
 }

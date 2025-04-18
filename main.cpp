@@ -9,7 +9,7 @@ int main(){
     char *argv[2];
 
     argv[0] = (char *) "TSP";
-    argv[1] = (char *) "instancias/att48.tsp";
+    argv[1] = (char *) "instancias/burma14.tsp";
 
     srand(time(NULL));
 
@@ -19,7 +19,9 @@ int main(){
 
     Solution s = Construcao();
 
-    std::cout << s.cost << std::endl;
+    s.print();
+
+    RVND(s);
 
     s.calculateCost();
 

@@ -3,10 +3,13 @@
 
 #include "solution.h"
 
-void RVND(Solution &s);
+void RVND(Solution & s);
 
-bool bestImprovementSwap(Solution &s);
+bool bestImprovementSwap(Solution & s);
 
+bool bestImprovement2OPT(Solution & s);
+
+bool bestImprovementInsertion(Solution & s, int bloco);
 
 Solution solve();
 
