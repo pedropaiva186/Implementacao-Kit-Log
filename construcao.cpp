@@ -25,8 +25,8 @@ std::vector<InsertionInfo> calcularCustoInsercao(Solution& s, std::vector<int>& 
     std::vector<InsertionInfo> valoresDeInsercao = std::vector<InsertionInfo>((s.route.size() - 1) * CL.size());
     
     // Pegando a matriz de adjascência, que será necessária para o cálculo do custo
-    Data &data = Data::getInstance();
-    double** &matriz = data.matrizAdj;
+    Data & data = Data::getInstance();
+    auto & matriz = data.matrizAdj;
 
     // Contador de cada InsertionInfo que for inserido no vector
     int l = 0;

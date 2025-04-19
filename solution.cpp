@@ -44,6 +44,7 @@ void Solution::buildTrivial(){
     cost += data.matrizAdj[route[data.n-1]][route[0]];
 }
 
+// Função que executará o SWAP
 void Solution::swap(const int i, const int j){
     Data & data = Data::getInstance();
     

@@ -7,4 +7,4 @@ run:
 	./tsp
 
 clean:
-	rm ./tsp
+	rm ./tsp *.txt
