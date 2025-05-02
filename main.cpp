@@ -6,49 +6,50 @@
 #include "ils.h"
 #include "solution.h"
 
-int main(){
+int main() {
+    for(int i = 0; i < 10; i++) {
+        auto inicio = std::chrono::high_resolution_clock::now();
 
-    auto inicio = std::chrono::high_resolution_clock::now();
+        char *argv[2];
 
-    char *argv[2];
+        argv[0] = (char *) "TSP";
+        argv[1] = (char *) "instances/instância.tsp";
 
-    argv[0] = (char *) "TSP";
-    argv[1] = (char *) "instancias/eil101.tsp";
+        srand(time(NULL));
 
-    srand(time(NULL));
+        Data & data = Data::getInstance();
 
-    Data & data = Data::getInstance();
+        data.read(2, argv);
 
-    data.read(2, argv);
+        Solution s;
 
-    Solution s;
+        int maxIter = 50, maxIterIls;
 
-    int maxIter = 50, maxIterIls;
+        if(data.n >= 150) {
+            maxIterIls = data.n / 2;
+        } else {
+            maxIterIls = data.n;
+        }
 
-    if(data.n >= 150) {
-        maxIterIls = data.n / 2;
-    } else {
-        maxIterIls = data.n;
-    }
+        s = ils(maxIter, maxIterIls);
 
-    s = ils(maxIter, maxIterIls);
+        s.print();
 
-    s.print();
+        auto fim = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> duracao = fim - inicio;
 
-    auto fim = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duracao = fim - inicio;
+        std::ofstream tempo("tempo.txt", std::ios::app);
+        
+        if(tempo.is_open()) {
+            tempo << "+ " << duracao.count() << std::endl;
+            tempo.close();
+        }
 
-    std::ofstream tempo("tempo.txt", std::ios::app);
-    
-    if(tempo.is_open()) {
-        tempo << "Tempo: " << duracao.count() << std::endl;
-        tempo.close();
-    }
+        std::ofstream custo("custo.txt", std::ios::app);
 
-    std::ofstream custo("custo.txt", std::ios::app);
-
-    if(custo.is_open()) {
-        custo << "Custo: " << s.cost << std::endl;
+        if(custo.is_open()) {
+            custo << "+ " << s.cost << std::endl;
+        }
     }
   
     return 0;

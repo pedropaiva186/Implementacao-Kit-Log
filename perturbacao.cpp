@@ -36,9 +36,6 @@ Solution perturbacao(Solution & s) {
     i = distIndex1(gen);
     j = distIndex2(gen);
 
-    seg_i.insert(seg_i.begin(), rota.begin() + i, rota.begin() + i + tam_seg_i);
-    seg_j.insert(seg_j.begin(), rota.begin() + j, rota.begin() + j + tam_seg_j);
-
     // Calculando o impacto da mudança no custo
     if(i + tam_seg_i == j) {
         deltaCusto = - matriz[rota[i - 1]][rota[i]] - matriz[rota[i + tam_seg_i - 1]][rota[i + tam_seg_i]]
@@ -50,6 +47,9 @@ Solution perturbacao(Solution & s) {
                      + matriz[rota[i - 1]][rota[j]] + matriz[rota[j + tam_seg_j - 1]][rota[i + tam_seg_i]]
                      + matriz[rota[j - 1]][rota[i]] + matriz[rota[i + tam_seg_i - 1]][rota[j + tam_seg_j]];
     }
+
+    seg_i.insert(seg_i.begin(), rota.begin() + i, rota.begin() + i + tam_seg_i);
+    seg_j.insert(seg_j.begin(), rota.begin() + j, rota.begin() + j + tam_seg_j);
 
     // Retirando o segmento "j" e pondo o segmento "i" no lugar
     rota.insert(rota.begin() + j, seg_i.begin(), seg_i.end());
