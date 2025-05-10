@@ -3,7 +3,6 @@
 #include <vector>
 #include <algorithm>
 #include "construcao.h"
-#include "subsequence.h"
 
 struct verticeECusto {
     int vertice;
@@ -67,6 +66,9 @@ Solution Construcao() {
         // Apagando o vértice escolhido do CL e colocando-o dentro da rota
         CL.erase(std::remove(CL.begin(), CL.end(), selecionado.vertice), CL.end());
         s.route.insert(s.route.begin() + s.route.size() - 1, selecionado.vertice);
+
+        // Definindo o vértice final atual
+        r = selecionado.vertice;
     }
 
     // Transferindo o valor do custo para a rota
