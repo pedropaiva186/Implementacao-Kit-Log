@@ -1,33 +1,26 @@
 #include <iostream>
 #include <vector>
-#include "solution.h"
-#include "data.h"
+#include "subsequence.h"
 
-struct Subsequence {
-    double T, C; // Duração e ao Custo Acumulado
-    int W; // Custo de Atraso
-    int first, last; // Primeiro e último elemento da subsequência
-    // Função responsável por combinar duas subsequências
-    inline static Subsequence Concatenate(Subsequence &sigma1, Subsequence &sigma2) {
-        auto &t = Data::getInstance().matrizAdj;
-        Subsequence sigma;
-        // Valor da aresta entre o último elemento da primeira subsequência com o primeiro elemento da segunda subsequência
-        double temp = t[sigma1.last][sigma2.first];
+// Função responsável por combinar duas subsequências
+Subsequence Subsequence::Concatenate(Subsequence &sigma1, Subsequence &sigma2) {
+    auto &t = Data::getInstance().matrizAdj;
+    Subsequence sigma;
+    // Valor da aresta entre o último elemento da primeira subsequência com o primeiro elemento da segunda subsequência
+    double temp = t[sigma1.last][sigma2.first];
 
-        // Calculando o valor das estruturas auxiliares e definindo outros parâmetros
-        sigma.W = sigma1.W + sigma2.W;
-        sigma.T = sigma1.T + temp + sigma2.T;
-        sigma.C = sigma1.C + sigma2.W * (sigma1.T + temp) + sigma2.C;
-        sigma.first = sigma1.first;
-        sigma.last = sigma2.last;
+    // Calculando o valor das estruturas auxiliares e definindo outros parâmetros
+    sigma.W = sigma1.W + sigma2.W;
+    sigma.T = sigma1.T + temp + sigma2.T;
+    sigma.C = sigma1.C + sigma2.W * (sigma1.T + temp) + sigma2.C;
+    sigma.first = sigma1.first;
+    sigma.last = sigma2.last;
 
-        return sigma;
-    }
-};
+    return sigma;
+}
 
 // Função responsável por atualizar a matriz de subsequência
 void updateAllSubseq(Solution &s, std::vector<std::vector<Subsequence>> &subseq_matriz) {
-    
     int aux = s.route.size();
 
     // Atualizando a diagonal principal

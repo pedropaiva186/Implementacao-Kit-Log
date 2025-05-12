@@ -71,6 +71,10 @@ Solution Construcao() {
         r = selecionado.vertice;
     }
 
+    // Adicionando o custo da última aresta
+    duracao_auxiliar += matriz_adj[r][1];
+    custo_auxiliar += duracao_auxiliar;
+
     // Transferindo o valor do custo para a rota
     s.cost = custo_auxiliar;
     return s;
