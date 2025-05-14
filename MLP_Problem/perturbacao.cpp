@@ -1,52 +1,46 @@
 #include <iostream>
 #include "solution.h"
+#include "subsequence.h"
 #include <vector>
 #include <cmath>
-#include <random>
 
-Solution perturbacao(Solution & s) {
-    // Setando a semente para geração de números aleatórios
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    Data & data = Data::getInstance();
+Solution perturbacao(Solution &s) {
+    Data &data = Data::getInstance();
+
+    int n = data.n;
+    int half_n = n / 2;
+    int max_seg = ceil(n / 10.0);
 
     // Criando a solução que será retornada, que será baseada na solução advinda do parâmetro
     Solution solutionAux = s;
+    Subsequence subseq;
+    std::vector<std::vector<Subsequence>> matrizSub(s.route.size(), std::vector<Subsequence>(s.route.size()));
+
+    // Atualizando a matriz de subsequências a partir da solução atual
+    updateAllSubseq(s, matrizSub);
 
     int tam_seg_i, tam_seg_j, i, j;
     std::vector<int> seg_i, seg_j;
-    double deltaCusto = 0;
 
-    auto & rota = solutionAux.route;
-    auto & matriz = data.matrizAdj;
-
-    std::uniform_int_distribution<> distTam(2, std::ceil(data.n / 10.0));
+    auto &rota = solutionAux.route;
 
     // Definindo o tamanho dos dois segmentos que trocarão de lugar
-    tam_seg_i = distTam(gen);
-    tam_seg_j = distTam(gen);
+    tam_seg_i = 2 + (rand() % (max_seg - 1));
+    tam_seg_j = 2 + (rand() % (max_seg - 1));
 
-    // Serão os indíces que definirão as posições dos vértices
-    // Onde esse calculo ficou grande pois estou impondo limites para os valores nos quais "i" e "j" podem
-    // assumir, para que esse processo nunca falhe e leve O(1).
+    // Definindo os indíces
+    i = 1 + (rand() % (half_n - tam_seg_i));
+    j = half_n + (rand() % (n - tam_seg_j - half_n + 1));
 
-    std::uniform_int_distribution<> distIndex1(1, (data.n / 2) - tam_seg_i);
-    std::uniform_int_distribution<> distIndex2(data.n / 2, data.n - tam_seg_j);
+    subseq = Subsequence::Concatenate(matrizSub[0][i - 1], matrizSub[j][j + tam_seg_j - 1]);
 
-    i = distIndex1(gen);
-    j = distIndex2(gen);
-
-    // Calculando o impacto da mudança no custo
-    if(i + tam_seg_i == j) {
-        deltaCusto = - matriz[rota[i - 1]][rota[i]] - matriz[rota[i + tam_seg_i - 1]][rota[i + tam_seg_i]]
-                     - matriz[rota[j + tam_seg_j - 1]][rota[j + tam_seg_j]] + matriz[rota[i - 1]][rota[j]]
-                     + matriz[rota[j + tam_seg_j - 1]][rota[i]] + matriz[rota[i + tam_seg_i - 1]][rota[j + tam_seg_j]];
-    } else {
-        deltaCusto = - matriz[rota[i - 1]][rota[i]] - matriz[rota[i + tam_seg_i - 1]][rota[i + tam_seg_i]]
-                     - matriz[rota[j - 1]][rota[j]] - matriz[rota[j + tam_seg_j - 1]][rota[j + tam_seg_j]]
-                     + matriz[rota[i - 1]][rota[j]] + matriz[rota[j + tam_seg_j - 1]][rota[i + tam_seg_i]]
-                     + matriz[rota[j - 1]][rota[i]] + matriz[rota[i + tam_seg_i - 1]][rota[j + tam_seg_j]];
+    // Caso sejam adjascentes
+    if(i + tam_seg_i != j) {
+        subseq = Subsequence::Concatenate(subseq, matrizSub[i + tam_seg_i][j - 1]);
     }
+
+    subseq = Subsequence::Concatenate(subseq, matrizSub[i][i + tam_seg_i - 1]);
+    subseq = Subsequence::Concatenate(subseq, matrizSub[j + tam_seg_j][data.n]);
 
     seg_i.insert(seg_i.begin(), rota.begin() + i, rota.begin() + i + tam_seg_i);
     seg_j.insert(seg_j.begin(), rota.begin() + j, rota.begin() + j + tam_seg_j);
@@ -59,7 +53,7 @@ Solution perturbacao(Solution & s) {
     rota.insert(rota.begin() + i, seg_j.begin(), seg_j.end());
     rota.erase(rota.begin() + i + tam_seg_j, rota.begin() + i + tam_seg_j + tam_seg_i);
 
-    solutionAux.cost += deltaCusto;
+    solutionAux.cost = subseq.C;
 
     return solutionAux;
 }

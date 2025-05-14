@@ -9,11 +9,10 @@ struct verticeECusto {
     double custo;
 };
 
-std::vector<int> preencheCL() {
-    Data &data = Data::getInstance();
-    std::vector<int> c;
+std::vector<int> preencheCL(int &n) {
+    std::vector<int> c = {};
 
-    for(int i = 2; i <= data.n; i++) {
+    for(int i = 2; i <= n; i++) {
         c.push_back(i);
     }
 
@@ -21,15 +20,14 @@ std::vector<int> preencheCL() {
 }
 
 // Calculando o custo de inserção de cada possível vértice ao final da solução
-std::vector<verticeECusto> CalculaCusto(int &vertFinal, std::vector<int> &CL) {
-    Data &data = Data::getInstance();
-    std::vector<verticeECusto> custos = std::vector<verticeECusto>();
+std::vector<verticeECusto> CalculaCusto(int &vertFinal, std::vector<int> &CL, double ** matrizAdj) {
+    std::vector<verticeECusto> custos = {};
     verticeECusto aux;
 
     // Salvando o custo de cada possível inserção no vector com os custos
     for(int i : CL) {
         aux.vertice = i;
-        aux.custo = data.matrizAdj[vertFinal][i];
+        aux.custo = matrizAdj[vertFinal][i];
         custos.push_back(aux);
     }
 
@@ -41,18 +39,20 @@ bool compareByCost(const verticeECusto &a, const verticeECusto &b) {
 }
 
 Solution Construcao() {
-    auto &matriz_adj = Data::getInstance().matrizAdj;
+    Data &data = Data::getInstance();
+    auto &matriz_adj = data.matrizAdj;
     Solution s;
-    s.route = {1, 1};
+    auto &rota = s.route;
+    rota = {1};
     double custo_auxiliar = 0, duracao_auxiliar = 0;
-    std::vector<int> CL = preencheCL();
+    std::vector<int> CL = preencheCL(data.n);
 
     // Servirá como auxiliar para definirmos o vértice escolhido
     int r = 1;
     
     while(CL.size() != 0) {
         // Organizando e preenchendo o vector de custo de inserção
-        std::vector<verticeECusto> custoInsercao = CalculaCusto(r, CL);
+        std::vector<verticeECusto> custoInsercao = CalculaCusto(r, CL, matriz_adj);
         std::sort(custoInsercao.begin(), custoInsercao.end(), compareByCost);
 
         // Escolhendo um valor aleatório dentre os possíveis
@@ -65,7 +65,7 @@ Solution Construcao() {
 
         // Apagando o vértice escolhido do CL e colocando-o dentro da rota
         CL.erase(std::remove(CL.begin(), CL.end(), selecionado.vertice), CL.end());
-        s.route.insert(s.route.begin() + s.route.size() - 1, selecionado.vertice);
+        rota.push_back(selecionado.vertice);
 
         // Definindo o vértice final atual
         r = selecionado.vertice;
@@ -76,6 +76,7 @@ Solution Construcao() {
     custo_auxiliar += duracao_auxiliar;
 
     // Transferindo o valor do custo para a rota
+    rota.push_back(1);
     s.cost = custo_auxiliar;
     return s;
 }
