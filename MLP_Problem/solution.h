@@ -15,20 +15,13 @@ struct Solution
 
     void calculateCostAcum();
 
-    void buildTrivial();
-
     void calculateCost();
 
     void print();
-
-    void copy(const Solution & other);
-
-    void swap(const int i, const int j);
-
-    void mov2OPT(Solution & s, int init, int fim);
-
-    void insertion(Solution & s, int init, int fim, int bloco);
 };
 
+Solution perturbacao(Solution &s);
+
+Solution ils(int maxIter, int maxIterIls);
 
 #endif

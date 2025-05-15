@@ -1,73 +1,72 @@
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <algorithm>
-#include <random>
-#include "construcao.h"
+#include <iostream> // Biblioteca padrão do c++
+#include <cmath> // Funções matemática
+#include <vector> // Estrutura de dados vector
+#include <algorithm> // Permite o uso do "sort"
+#include <random> // Permite o uso de funções de aleatorização
 
-struct verticeECusto {
+#include "construcao.h"
+#include "data.h"
+#include "solution.h"
+
+struct verticeECusto
+{
     int vertice;
     double custo;
 };
 
-std::vector<int> preencheCL(int &n, int &n_ale) {
-    std::vector<int> c = {};
-
-    for(int i = 2; i <= n; i++) {
-        if(i == n_ale) {
-            continue;
-        }
-        c.push_back(i);
-    }
-
-    return c;
-}
-
 // Calculando o custo de inserção de cada possível vértice ao final da solução
-std::vector<verticeECusto> CalculaCusto(int &vertFinal, std::vector<int> &CL, double ** matrizAdj) {
-    std::vector<verticeECusto> custos = {};
-    verticeECusto aux;
+std::vector<verticeECusto> calculaCusto(int &vertFinal, std::vector<int> &CL)
+{
+    auto &matrizAdj = Data::getInstance().matrizAdj;
+    std::vector<verticeECusto> custos(CL.size());
 
-    // Salvando o custo de cada possível inserção no vector com os custos
-    for(int i : CL) {
-        aux.vertice = i;
-        aux.custo = matrizAdj[vertFinal][i];
-        custos.push_back(aux);
+    // Salvando o custo de cada possível inserção no vector custo
+    int aux = 0;
+    for(int i : CL)
+    {
+        custos[aux].vertice = i;
+        custos[aux].custo = matrizAdj[vertFinal][i];
+        aux++;
     }
 
     return custos;
 }
 
-bool compareByCost(const verticeECusto &a, const verticeECusto &b) {
+bool compareByCost(const verticeECusto &a, const verticeECusto &b)
+{
     return a.custo < b.custo;
 }
 
-Solution Construcao() {
-    // Utilizando a biblioteca random para obter números aleatórios
+Solution Construcao()
+{
+    // Gerando a seed de aleatoriedade
     std::random_device rd;
     std::mt19937 gen(rd());
 
     Data &data = Data::getInstance();
     auto &matriz_adj = data.matrizAdj;
-    Solution s;
-    auto &rota = s.route;
-    double custo_auxiliar, duracao_auxiliar;
-    rota = {1};
 
-    // Inserindo um número aleatório na rota
-    std::uniform_int_distribution<> ger(2, data.n);
-    int n_ale = ger(gen);
-    rota.push_back(n_ale);
-    std::vector<int> CL = preencheCL(data.n, n_ale);
-    duracao_auxiliar = matriz_adj[1][n_ale];
-    custo_auxiliar = duracao_auxiliar;
+    // Criando a rota que será retornada
+    Solution s;
+    s.route = {1};
+
+    // Estruturas para auxiliar o calculo do custo
+    double custo_auxiliar = 0, duracao_auxiliar = 0;
+
+    // Criando e preenchendo o CL
+    std::vector<int> CL;
+    for(int i = 2; i <= data.n; i++)
+    {
+        CL.push_back(i);
+    }
 
     // Servirá como auxiliar para definirmos o vértice escolhido
-    int r = n_ale;
+    int r = 1;
     
-    while(CL.size() != 0) {
+    while(!CL.empty())
+    {
         // Organizando e preenchendo o vector de custo de inserção
-        std::vector<verticeECusto> custoInsercao = CalculaCusto(r, CL, matriz_adj);
+        std::vector<verticeECusto> custoInsercao = calculaCusto(r, CL);
         std::sort(custoInsercao.begin(), custoInsercao.end(), compareByCost);
 
         // Escolhendo um valor aleatório dentre os possíveis
@@ -81,7 +80,7 @@ Solution Construcao() {
 
         // Apagando o vértice escolhido do CL e colocando-o dentro da rota
         CL.erase(std::remove(CL.begin(), CL.end(), selecionado.vertice), CL.end());
-        rota.push_back(selecionado.vertice);
+        s.route.push_back(selecionado.vertice);
 
         // Definindo o vértice final atual
         r = selecionado.vertice;
@@ -92,7 +91,7 @@ Solution Construcao() {
     custo_auxiliar += duracao_auxiliar;
 
     // Transferindo o valor do custo para a rota
-    rota.push_back(1);
+    s.route.push_back(1);
     s.cost = custo_auxiliar;
     return s;
 }

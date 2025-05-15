@@ -1,9 +1,11 @@
 #include <iostream>
 #include <vector>
+
 #include "subsequence.h"
 
 // Função responsável por combinar duas subsequências
-Subsequence Subsequence::Concatenate(Subsequence &sigma1, Subsequence &sigma2) {
+Subsequence Subsequence::Concatenate(Subsequence &sigma1, Subsequence &sigma2)
+{
     auto &t = Data::getInstance().matrizAdj;
     Subsequence sigma;
     // Valor da aresta entre o último elemento da primeira subsequência com o primeiro elemento da segunda subsequência
@@ -20,11 +22,13 @@ Subsequence Subsequence::Concatenate(Subsequence &sigma1, Subsequence &sigma2) {
 }
 
 // Função responsável por atualizar a matriz de subsequência
-void updateAllSubseq(Solution &s, std::vector<std::vector<Subsequence>> &subseq_matriz) {
+void updateAllSubseq(Solution &s, std::vector<std::vector<Subsequence>> &subseq_matriz)
+{
     int aux = s.route.size();
 
     // Atualizando a diagonal principal
-    for(int i = 0; i < aux; i++) {
+    for(int i = 0; i < aux; i++)
+    {
         // Depende se é o elemento "alpha 0" ou não
         subseq_matriz[i][i].W = (i > 0);
         subseq_matriz[i][i].T = 0;
@@ -34,15 +38,19 @@ void updateAllSubseq(Solution &s, std::vector<std::vector<Subsequence>> &subseq_
     }
 
     // Atualizando a parte triangular superior da matriz
-    for(int i = 0; i < aux; i++) {
-        for(int j = i + 1; j < aux; j++) {
+    for(int i = 0; i < aux; i++)
+    {
+        for(int j = i + 1; j < aux; j++)
+        {
             subseq_matriz[i][j] = Subsequence::Concatenate(subseq_matriz[i][j-1], subseq_matriz[j][j]);
         }
     }
 
     // Atualizando a parte triangular inferior da matriz, considerando as subsequências em ordem inversa
-    for(int i = aux - 1; i >= 0; i--) {
-        for(int j = i - 1; j >= 0; j--) {
+    for(int i = aux - 1; i >= 0; i--)
+    {
+        for(int j = i - 1; j >= 0; j--)
+        {
             subseq_matriz[i][j] = Subsequence::Concatenate(subseq_matriz[i][j + 1], subseq_matriz[j][j]);
         }
     }

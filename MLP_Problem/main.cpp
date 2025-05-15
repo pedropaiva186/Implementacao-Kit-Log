@@ -3,7 +3,6 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
-#include "ils.h"
 #include "solution.h"
 
 int main() {
@@ -11,7 +10,7 @@ int main() {
     char *argv[2];
 
     argv[0] = (char *) "TSP";
-    argv[1] = (char *) "instances/instancia.tsp";
+    argv[1] = (char *) "instances/dantzig42.tsp";
 
     Data & data = Data::getInstance();
 

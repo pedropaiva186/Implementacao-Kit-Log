@@ -1,14 +1,23 @@
 #include "solution.h"
+#include "subsequence.h"
+#include "localSearch.h"
+#include "construcao.h"
+
 #include <iostream>
 #include <iomanip>
+#include <random>
+#include <vector>
+#include <cmath>
 
-void Solution::calculateCostAcum() {
+void Solution::calculateCostAcum()
+{
     Data &data = Data::getInstance();
     int vert1, vert2;
     double aux = 0;
     cost = 0;
 
-    for(int i = 0; i < data.n; i++) {
+    for(int i = 0; i < data.n; i++)
+    {
         vert1 = route[i];
         vert2 = route[i + 1];
         
@@ -17,9 +26,11 @@ void Solution::calculateCostAcum() {
     }
 }
 
-void Solution::print(){
+void Solution::print()
+{
     std::cout << "Route: ";
-    for(int i = 0; i < Data::getInstance().n; i++){
+    for(int i = 0; i < Data::getInstance().n; i++)
+    {
         std::cout << route[i] << " - ";
     }
     std::cout << route[Data::getInstance().n] << std::endl;
@@ -27,13 +38,15 @@ void Solution::print(){
     std::cout << "Cost: " << cost << std::endl;
 }
 
-void Solution::calculateCost() {
+void Solution::calculateCost()
+{
     Data &data = Data::getInstance();
     auto &matriz = data.matrizAdj;
     cost = 0;
     int vert1, vert2;
 
-    for(int i = 0; i < data.n; i++) {
+    for(int i = 0; i < data.n; i++)
+    {
         vert1 = route[i];
         vert2 = route[i + 1];
 
@@ -41,64 +54,98 @@ void Solution::calculateCost() {
     }
 }
 
-void Solution::copy(const Solution &other){
-    route = std::vector<int>(other.route);
-    cost = other.cost;
+Solution perturbacao(Solution &s)
+{
+    // Gerando a seed de aleatoriedade
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    Data &data = Data::getInstance();
+
+    int n = data.n;
+    int half_n = n / 2;
+    int max_seg = ceil(n / 10.0);
+    int tam_seg_i, tam_seg_j, i, j;
+    std::vector<int> seg_i, seg_j;
+
+    // Criando a solução que será retornada, que será baseada na solução advinda do parâmetro
+    Solution solutionAux = s;
+    auto &rota = solutionAux.route;
+    Subsequence subseq;
+    std::vector<std::vector<Subsequence>> matrizSub(s.route.size(), std::vector<Subsequence>(s.route.size()));
+
+    // Definindo o tamanho dos dois segmentos que trocarão de lugar
+    std::uniform_int_distribution<> ger(2, max_seg);
+    tam_seg_i = ger(gen);
+    tam_seg_j = ger(gen);
+
+    // Definindo os indíces
+    std::uniform_int_distribution<> ger1(1, half_n - tam_seg_i);
+    i = ger1(gen);
+    std::uniform_int_distribution<> ger2(half_n, n - tam_seg_j);
+    j = ger2(gen);
+
+    // Atualizando a matriz de subsequências a partir da solução atual
+    updateAllSubseq(s, matrizSub);
+
+    subseq = Subsequence::Concatenate(matrizSub[0][i - 1], matrizSub[j][j + tam_seg_j - 1]);
+
+    // Caso sejam adjascentes
+    if(i + tam_seg_i != j)
+    {
+        subseq = Subsequence::Concatenate(subseq, matrizSub[i + tam_seg_i][j - 1]);
+    }
+
+    subseq = Subsequence::Concatenate(subseq, matrizSub[i][i + tam_seg_i - 1]);
+    subseq = Subsequence::Concatenate(subseq, matrizSub[j + tam_seg_j][data.n]);
+
+    seg_i.insert(seg_i.begin(), rota.begin() + i, rota.begin() + i + tam_seg_i);
+    seg_j.insert(seg_j.begin(), rota.begin() + j, rota.begin() + j + tam_seg_j);
+
+    // Retirando o segmento "j" e pondo o segmento "i" no lugar
+    rota.insert(rota.begin() + j, seg_i.begin(), seg_i.end());
+    rota.erase(rota.begin() + j + tam_seg_i, rota.begin() + j + tam_seg_i + tam_seg_j);
+
+    // Retirando o segmento "i" e pondo o segmento "j" no lugar
+    rota.insert(rota.begin() + i, seg_j.begin(), seg_j.end());
+    rota.erase(rota.begin() + i + tam_seg_j, rota.begin() + i + tam_seg_j + tam_seg_i);
+
+    solutionAux.cost = subseq.C;
+
+    return solutionAux;
 }
 
-void Solution::buildTrivial(){
-    Data & data = Data::getInstance();
-    int i;
+Solution ils(int maxIter, int maxIterIls)
+{
+    Solution bestOfAll;
+    bestOfAll.cost = INFINITY;
 
-    for(i = 1; i <= data.n; i++){
-        route[i-1] = i;
+    for(int i = 0; i < maxIter; i++)
+    {
+        Solution s = Construcao();
+        Solution best = s;
+
+        int iterIls = 0;
+
+        while(iterIls <= maxIterIls)
+        {
+            RVND(s);
+            
+            if(s.cost < best.cost)
+            {
+                best = s;
+                iterIls = 0;
+            }
+
+            s = perturbacao(best);
+            iterIls++;
+        }
+
+        if(best.cost < bestOfAll.cost)
+        {
+            bestOfAll = best;
+        }
     }
-    route[data.n] = 1;
-    cost = 0;
-    for(i = 0; i < data.n - 1; i++){
-        cost += data.matrizAdj[route[i]][route[i+1]];
-    }
-    cost += data.matrizAdj[route[data.n-1]][route[0]];
-}
 
-// Função que executará o SWAP
-void Solution::swap(const int i, const int j){
-    Data & data = Data::getInstance();
-    
-    int aux = route[i];
-    route[i] = route[j];
-    route[j] = aux;
-    
-}
-
-// Função que executará o 2-OPT
-void Solution::mov2OPT(Solution & s, int init, int fim) {
-    Data & data = Data::getInstance();
-
-    while(init < fim) {
-        int aux = s.route[init];
-
-        s.route[init] = s.route[fim];
-        s.route[fim] = aux;
-
-        init++;
-        fim--;
-    }
-}
-
-// Função que executará o Insertion
-void Solution::insertion(Solution & s, int posVert, int posInserir, int bloco) {
-    Data & data = Data::getInstance();
-    auto & rota = s.route;
-    std::vector<int> vert;
-
-    vert.insert(vert.begin(), rota.begin() + posVert, rota.begin() + posVert + bloco);
-
-    if(posVert < posInserir) {
-        rota.insert(rota.begin() + posInserir + 1, vert.begin(), vert.end());
-        rota.erase(rota.begin() + posVert, rota.begin() + posVert + bloco);
-    } else {
-        rota.erase(rota.begin() + posVert, rota.begin() + posVert + bloco);
-        rota.insert(rota.begin() + posInserir + 1, vert.begin(), vert.end());
-    }
+    return bestOfAll;
 }

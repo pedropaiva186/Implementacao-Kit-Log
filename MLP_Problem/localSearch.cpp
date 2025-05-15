@@ -1,11 +1,13 @@
 #include "localSearch.h"
-#include "stdlib.h"
+#include "solution.h"
+
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <random>
 
-void RVND(Solution &s){
+void RVND(Solution &s)
+{
     // Gerando a seed de aleatoriedade e gerador de números
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -18,7 +20,8 @@ void RVND(Solution &s){
     // Atualizando a matriz de subsequência pela primeira vez
     updateAllSubseq(s, matrizSub);
 
-    while(NL.empty() == false){
+    while(NL.empty() == false)
+    {
         int n = ger(gen);
 
         switch(NL[n]){
@@ -37,32 +40,36 @@ void RVND(Solution &s){
             case 5:
                 improved = bestImprovementInsertion(s, 3, matrizSub);
                 break;
-            default:
-                break;
         }
 
-        if(improved) {
+        if(improved)
+        {
         NL = {1, 2, 3, 4, 5};
         // Atualizando a matriz pois a solução mudou
         updateAllSubseq(s, matrizSub);
-        }else {
+        }else
+        {
             NL.erase(NL.begin() + n);
         }
     }
 }
 
-bool bestImprovement2OPT(Solution &s, std::vector<std::vector<Subsequence>> &matrizSub) {
+bool bestImprovement2OPT(Solution &s, std::vector<std::vector<Subsequence>> &matrizSub)
+{
     int size = s.route.size() - 1;
     Subsequence subseq;
     int best_i, best_j;
     double bestCusto = nan("");
 
-    for(int i = 1; i < size - 1; i++) {
-        for(int j = i + 1; j < size; j++) {
+    for(int i = 1; i < size - 1; i++)
+    {
+        for(int j = i + 1; j < size; j++)
+        {
             subseq = Subsequence::Concatenate(matrizSub[0][i - 1], matrizSub[j][i]);
             subseq = Subsequence::Concatenate(subseq, matrizSub[j + 1][size]);
 
-            if(subseq.C < bestCusto || std::isnan(bestCusto)) {
+            if(subseq.C < bestCusto || std::isnan(bestCusto))
+            {
                 bestCusto = subseq.C;
                 best_i = i;
                 best_j = j;
@@ -70,8 +77,19 @@ bool bestImprovement2OPT(Solution &s, std::vector<std::vector<Subsequence>> &mat
         }
     }
 
-    if(bestCusto < s.cost) {
-        s.mov2OPT(s, best_i, best_j);
+    if(bestCusto < s.cost)
+    {
+        while(best_i < best_j)
+        {
+            int aux = s.route[best_i];
+
+            s.route[best_i] = s.route[best_j];
+            s.route[best_j] = aux;
+
+            best_i++;
+            best_j--;
+        }
+
         s.cost = bestCusto;
         return true;
     }
@@ -79,20 +97,28 @@ bool bestImprovement2OPT(Solution &s, std::vector<std::vector<Subsequence>> &mat
     return false;
 }
 
-bool bestImprovementInsertion(Solution &s, int bloco, std::vector<std::vector<Subsequence>> &matrizSub) {
+bool bestImprovementInsertion(Solution &s, int bloco, std::vector<std::vector<Subsequence>> &matrizSub)
+{
     int size = s.route.size() - 1;
     Subsequence subseq;
     int indexVert, indexFinal;
     double bestCusto = nan("");
 
-    for(int i = 1; i < size - bloco + 1; i++) {
-        for(int j = 0; j < size; j++) {
+    for(int i = 1; i < size - bloco + 1; i++)
+    {
+        for(int j = 0; j < size; j++)
+        {
+            if(i - 1 <= j && j <= i + bloco - 1)
+            {
+                continue;
+            }
 
             subseq = Subsequence::Concatenate(matrizSub[0][i - 1], matrizSub[i + bloco][j]);
             subseq = Subsequence::Concatenate(subseq, matrizSub[i][i + bloco - 1]);
             subseq = Subsequence::Concatenate(subseq, matrizSub[j + 1][size]);
 
-            if(subseq.C < bestCusto || std::isnan(bestCusto)) {
+            if(subseq.C < bestCusto || std::isnan(bestCusto))
+            {
                 bestCusto = subseq.C;
                 indexVert = i;
                 indexFinal = j;
@@ -100,8 +126,23 @@ bool bestImprovementInsertion(Solution &s, int bloco, std::vector<std::vector<Su
         }
     }
 
-    if(bestCusto < s.cost) {
-        s.insertion(s, indexVert, indexFinal, bloco);
+    if(bestCusto < s.cost)
+    {
+        auto &rota = s.route;
+        std::vector<int> vert;
+
+        vert.insert(vert.begin(), rota.begin() + indexVert, rota.begin() + indexVert + bloco);
+
+        if(indexVert < indexFinal)
+        {
+            rota.insert(rota.begin() + indexFinal + 1, vert.begin(), vert.end());
+            rota.erase(rota.begin() + indexVert, rota.begin() + indexVert + bloco);
+        } else
+        {
+            rota.erase(rota.begin() + indexVert, rota.begin() + indexVert + bloco);
+            rota.insert(rota.begin() + indexFinal + 1, vert.begin(), vert.end());
+        }
+
         s.cost = bestCusto;
         return true;
     }
@@ -109,26 +150,31 @@ bool bestImprovementInsertion(Solution &s, int bloco, std::vector<std::vector<Su
     return false;
 }
 
-bool bestImprovementSwap(Solution &s, std::vector<std::vector<Subsequence>> &matrizSub) {
+bool bestImprovementSwap(Solution &s, std::vector<std::vector<Subsequence>> &matrizSub)
+{
     int size = s.route.size() - 1;
     Subsequence subseq;
     double bestCusto = nan("");
     int bestI, bestJ, i, j;
 
-    for(i = 1; i < size - 1; i++) {
-        for(j = i + 1; j < size; j++) {
+    for(i = 1; i < size - 1; i++)
+    {
+        for(j = i + 1; j < size; j++)
+        {
 
             subseq = Subsequence::Concatenate(matrizSub[0][i - 1], matrizSub[j][j]);
 
             // Caso não sejam adjacentes haverá uma quarta subsequência, que será somada
-            if ((j != i + 1)){
+            if ((j != i + 1))
+            {
                 subseq = Subsequence::Concatenate(subseq, matrizSub[i + 1][j - 1]);
             }
 
             subseq = Subsequence::Concatenate(subseq, matrizSub[i][i]);
             subseq = Subsequence::Concatenate(subseq, matrizSub[j + 1][size]);
 
-            if(subseq.C < bestCusto || std::isnan(bestCusto)) {
+            if(subseq.C < bestCusto || std::isnan(bestCusto))
+            {
                 bestCusto = subseq.C;
                 bestI = i;
                 bestJ = j;
@@ -136,23 +182,15 @@ bool bestImprovementSwap(Solution &s, std::vector<std::vector<Subsequence>> &mat
         }
     }
 
-    if(bestCusto < s.cost) {
-        s.swap(bestI, bestJ);
+    if(bestCusto < s.cost)
+    {
+        int aux = s.route[bestI];
+        s.route[bestI] = s.route[bestJ];
+        s.route[bestJ] = aux;
+
         s.cost = bestCusto;
         return true;
     }
 
     return false;
-}
-
-
-
-Solution solve(){
-    Solution s = Solution();
-    s.buildTrivial();
-    std::cout << "Solucao inicial:" << std::endl;
-    s.print();
-    std::cout << "Solucao final:" << std::endl;
-    RVND(s);
-    return s;
 }

@@ -12,6 +12,4 @@ bool bestImprovement2OPT(Solution &s, std::vector<std::vector<Subsequence>> &mat
 
 bool bestImprovementInsertion(Solution & s, int bloco, std::vector<std::vector<Subsequence>> &matrizSub);
 
-Solution solve();
-
 #endif // LOCAL_SEARCH_H

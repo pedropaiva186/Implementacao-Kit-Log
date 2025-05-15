@@ -22,13 +22,7 @@ int main() {
 
     Solution s;
 
-    int maxIter = 50, maxIterIls;
-
-    if(data.n >= 150) {
-        maxIterIls = data.n / 2;
-    } else {
-        maxIterIls = data.n;
-    }
+    int maxIter = 50, maxIterIls = data.n >= 150 ? data.n / 2: data.n;
 
     s = ils(maxIter, maxIterIls);
 
