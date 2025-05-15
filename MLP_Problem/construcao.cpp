@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
+#include <random>
 #include "construcao.h"
 
 struct verticeECusto {
@@ -9,10 +10,13 @@ struct verticeECusto {
     double custo;
 };
 
-std::vector<int> preencheCL(int &n) {
+std::vector<int> preencheCL(int &n, int &n_ale) {
     std::vector<int> c = {};
 
     for(int i = 2; i <= n; i++) {
+        if(i == n_ale) {
+            continue;
+        }
         c.push_back(i);
     }
 
@@ -39,16 +43,27 @@ bool compareByCost(const verticeECusto &a, const verticeECusto &b) {
 }
 
 Solution Construcao() {
+    // Utilizando a biblioteca random para obter números aleatórios
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
     Data &data = Data::getInstance();
     auto &matriz_adj = data.matrizAdj;
     Solution s;
     auto &rota = s.route;
+    double custo_auxiliar, duracao_auxiliar;
     rota = {1};
-    double custo_auxiliar = 0, duracao_auxiliar = 0;
-    std::vector<int> CL = preencheCL(data.n);
+
+    // Inserindo um número aleatório na rota
+    std::uniform_int_distribution<> ger(2, data.n);
+    int n_ale = ger(gen);
+    rota.push_back(n_ale);
+    std::vector<int> CL = preencheCL(data.n, n_ale);
+    duracao_auxiliar = matriz_adj[1][n_ale];
+    custo_auxiliar = duracao_auxiliar;
 
     // Servirá como auxiliar para definirmos o vértice escolhido
-    int r = 1;
+    int r = n_ale;
     
     while(CL.size() != 0) {
         // Organizando e preenchendo o vector de custo de inserção
@@ -57,7 +72,8 @@ Solution Construcao() {
 
         // Escolhendo um valor aleatório dentre os possíveis
         double alpha = 0.5;
-        verticeECusto selecionado = custoInsercao[rand() % (int) ceil(alpha * custoInsercao.size())];
+        std::uniform_int_distribution<> ger(0, (int) floor(alpha * custoInsercao.size()));
+        verticeECusto selecionado = custoInsercao[ger(gen)];
 
         // Adicionando os valores referentes ao vértice escolhido
         duracao_auxiliar += selecionado.custo;

@@ -3,8 +3,13 @@
 #include "subsequence.h"
 #include <vector>
 #include <cmath>
+#include <random>
 
 Solution perturbacao(Solution &s) {
+    // Gerando a seed de aleatoriedade
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
     Data &data = Data::getInstance();
 
     int n = data.n;
@@ -25,12 +30,15 @@ Solution perturbacao(Solution &s) {
     auto &rota = solutionAux.route;
 
     // Definindo o tamanho dos dois segmentos que trocarão de lugar
-    tam_seg_i = 2 + (rand() % (max_seg - 1));
-    tam_seg_j = 2 + (rand() % (max_seg - 1));
+    std::uniform_int_distribution<> ger(2, max_seg);
+    tam_seg_i = ger(gen);
+    tam_seg_j = ger(gen);
 
     // Definindo os indíces
-    i = 1 + (rand() % (half_n - tam_seg_i));
-    j = half_n + (rand() % (n - tam_seg_j - half_n + 1));
+    std::uniform_int_distribution<> ger1(1, half_n - tam_seg_i);
+    i = ger1(gen);
+    std::uniform_int_distribution<> ger2(half_n, n - tam_seg_j);
+    j = ger2(gen);
 
     subseq = Subsequence::Concatenate(matrizSub[0][i - 1], matrizSub[j][j + tam_seg_j - 1]);
 
